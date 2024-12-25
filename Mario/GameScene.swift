@@ -24,6 +24,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var coinLabel: SKLabelNode!
     var thanks: SKLabelNode!
     var productionLabel: SKLabelNode!
+    var quesBlocks: [SKSpriteNode] = []
     
     
     var lastContactDirection: CGVector?
@@ -66,7 +67,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         backDoor = self.childNode(withName: "background/backDoor") as? SKSpriteNode
         thanks = self.childNode(withName: "thanks") as? SKLabelNode
         productionLabel = self.childNode(withName: "productionLabel") as? SKLabelNode
-                
+        
+        self.enumerateChildNodes(withName: "background/quesBlock_*") { node, _ in
+            if let block = node as? SKSpriteNode {
+                self.quesBlocks.append(block)
+            }
+        }
+
+           
         gifTexturesRight = [
             SKTexture(imageNamed: "gifka-1R"),
             SKTexture(imageNamed: "gifka-2R"),
@@ -103,18 +111,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         coinLabel?.text = "Coin: \(coinCol)"
     }
     
-    func addCoin() {
+    func handleQuesContact(with block: SKSpriteNode) {
+        if quesBlocks.contains(block) {
+            block.texture = SKTexture(imageNamed: "emptyBlock")
+            block.physicsBody?.categoryBitMask = PhysicsBodies.wallPhMask
+            block.zPosition = 1
+            addCoin(from: block)
+        }
+    }
+
+    
+    func addCoin(from block: SKSpriteNode) {
         let coin = SKSpriteNode(imageNamed: "coin")
-        let pos = mario.position
+        let marioPos = mario.position
+        coin.zPosition = 2
+        coin.size = CGSize(width: 40, height: 60)
+        coin.position = CGPoint(x: marioPos.x, y: marioPos.y)
         self.addChild(coin)
-        coin.size.width = 40
-        coin.size.height = 60
-        coin.zPosition = 1
-        coin.position = CGPoint(x: pos.x, y: pos.y)
-        let actionCoin = SKAction.moveTo(y: coin.position.y + 100, duration: 1)
-        let vis = SKAction.fadeOut(withDuration: 1)
-        let pair = SKAction.sequence([actionCoin,vis])
-        coin.run(pair)
+
+        let moveUp = SKAction.moveTo(y: coin.position.y + 100, duration: 1)
+        let fadeOut = SKAction.fadeOut(withDuration: 1)
+        let remove = SKAction.removeFromParent()
+        coin.run(SKAction.sequence([moveUp, fadeOut, remove]))
+        
         coinCol += 1
         coinLabel.text = "Coin: \(coinCol)"
     }
@@ -210,8 +229,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 marioController.continueMoving()
             }
             if contact.contactNormal.dy > 0{
-                addCoin()
-                bodyB?.removeFromParent()
+                if let block = bodyB as? SKSpriteNode {
+                    handleQuesContact(with: block)
+                }
             }
             if contact.contactNormal.dx > 0 {
                 marioController.set_canMoveRight(val: false)
