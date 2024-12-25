@@ -45,6 +45,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         static let quesPhMask: UInt32 = 4
         static let flagPhMask: UInt32 = 5
         static let wallPhMask: UInt32 = 6
+        static let pitsPhMask: UInt32 = 7
     }
     
     var gifTexturesRight: [SKTexture] = []
@@ -190,6 +191,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 died()
                 bodyA?.removeFromParent()
             }
+        }
+        
+        if bodyA?.physicsBody?.categoryBitMask == PhysicsBodies.marioPhMask &&
+            bodyB?.physicsBody?.categoryBitMask == PhysicsBodies.pitsPhMask{
+            died()
         }
           
           
