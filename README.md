@@ -46,6 +46,7 @@ This project was created to learn game development with Swift and SpriteKit. The
 
 ### **Challenges**:
    - Mario has limited lives; touching an enemy without jumping on it will result in a game over.
+   - There are also pits that Mario can fall into, which will instantly end the game.
 
 ![death](https://github.com/user-attachments/assets/723d489a-bf02-4af2-aa53-0933b4af0daa)
 
